@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr" ng-app="prome" id="ng-app" ng-controller="AppController">
+<head>
+    <title>Prome Developer Tools</title>
+    <link href="css/panel.min.css" rel="stylesheet">
+</head>
+
+<body>
+	<div class="welcome-overlay" ng-hide="inspectedPage.isProme">
+		<div class="container-fluid">
+			<div class="logo"><img src="img/logo-prome.png"></div>
+			<p class="lead">Prome Developer Tools panel provides development shortcuts<br>in a local virtualized environment.</p>
+
+			<form class="form-inline shortcut">
+				<div class="form-group">
+					<label class="sr-only" for="tenantSelection">Tenant</label>
+					<select class="form-control" id="tenantSelection" ng-model="newUrl.tenant">
+						<option ng-repeat="tenant in tenants"
+					            value="{{tenant.alias}}">
+					      {{tenant.name}}
+					    </option>
+					</select>
+				</div>
+
+				<div class="form-group">
+					<label class="sr-only" for="envSelection">Environment</label>
+					<select class="form-control" id="envSelection" ng-model="newUrl.env">
+						<option value="dev"> Development</option>
+						<option value="prod"> Production</option>
+					</select>
+				</div>
+
+				<button ng-click="openPromeUrl(newUrl)" class="btn btn-success"><span class="glyphicon glyphicon-new-window"></span>&nbsp;&nbsp;Open</button>
+			</form>
+		</div>
+	</div>
+
+	<nav class="navbar navbar-fixed-top">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<a href="#" class="navbar-brand client-name dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{inspectedPage.tenant.name}}</a>
+				<ul class="dropdown-menu tenant-dropdown" role="menu"></ul>
+			</div>
+			<!--<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li class="commander-availability" ng-click="pingCommander()" ng-class="{available: isCommanderAvailable, unavailable: !isCommanderAvailable}">{{isCommanderAvailable ? 'Available' : 'Remote connection error'}}&nbsp;&nbsp;&nbsp;<span class="glyphicon"></span></li>
+				</ul>
+			</div><!--/.nav-collapse -->
+		</div>
+	</nav>
+
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-sm-3 col-md-2 sidebar">
+				<ul class="nav nav-sidebar" ng-repeat="(commandAlias, command) in commands">
+					<li class="nav-header">{{command.title}}</li>
+					<li class="action" ng-class="{active: inspectedPage.activeCommand.alias == actionAlias, loading: inspectedPage.requests[actionAlias].status == 'loading', success: inspectedPage.requests[actionAlias].status == 'success' && inspectedPage.requests[actionAlias].unread, error: inspectedPage.requests[actionAlias].status == 'error' && inspectedPage.requests[actionAlias].unread}" ng-repeat="(actionAlias, action)  in command.actions"><a href="#" ng-click="switchCommand(actionAlias, commandAlias)" ng-dblclick="switchCommand(actionAlias, commandAlias, true)">{{action.label}}<span class="glyphicon"></span></a><div class="spinner"><div class="double-bounce1"></div><div class="double-bounce2"></div></div></li>
+				</ul>
+			</div>
+			<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+				<div class="request" ng-class="{loading: getActiveRequest().status == 'loading', success: getActiveRequest().status == 'success',  error: getActiveRequest().status == 'error'}">
+					<h3><span class="title">{{inspectedPage.activeCommand.title}}</span><span class="glyphicon"></span><div class="spinner"><div class="double-bounce1"></div><div class="double-bounce2"></div></div><div class="loading-message">Processing</div></h3>
+					<div class="output" ng-hide="getActiveRequest().status == 'loading' || !getActiveRequest().output" ng-bind-html="getActiveRequest().output"></div>
+					<div class="info" ng-hide="getActiveRequest().status == 'loading' || !getActiveRequest().info">{{getActiveRequest().info}}</div>
+					<button class="btn btn-success btn-send" ng-hide="!inspectedPage.activeCommand || getActiveRequest().status == 'loading'" ng-click="launchRequest(inspectedPage.activeCommand)"><span class="glyphicon glyphicon-flash"></span>&nbsp;&nbsp;Send command</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="vendors/angular.min.js"></script>
+	<script type="text/javascript" src="vendors/angular-local-storage.min.js"></script>
+	<script type="text/javascript" src="js/panel/app.js"></script>
+	<script type="text/javascript" src="js/panel/app-controller.js"></script>
+	<script type="text/javascript" src="js/panel/command-service.js"></script>
+	<script type="text/javascript" src="js/panel/messaging-service.js"></script>
+</body>
+</html>

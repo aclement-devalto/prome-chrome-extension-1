@@ -1,0 +1,18 @@
+{
+    "name": "Prome Developer Tools",
+    "version": "1.0.0",
+    "description": "Devtools for Prome 3",
+    "devtools_page": "devtools.html",
+    "background": {
+        "scripts": [
+            "js/background.js"
+        ]
+    },
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+    "permissions": [
+        "tabs",
+        "http://*/*",
+        "https://*/*"
+    ],
+    "manifest_version": 2
+}

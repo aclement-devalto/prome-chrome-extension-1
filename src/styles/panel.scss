@@ -1,0 +1,368 @@
+@import 'bootstrap';
+
+$console-color: #232323;
+$console-text-color: #eee;
+$prome-color: #2cc6e1;
+$success-color: #5cb85c;
+$error-color: #d9534f;
+
+body {
+	background-color: $console-color;
+	font-family: 'Roboto', Helvetica, sans-serif;
+	padding-top: 50px;
+}
+
+.welcome-overlay {
+	background-color: white;
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 10000;
+
+	.logo {
+		width: 100%;
+		margin: 180px auto 30px;
+		text-align: center;
+
+		img {
+			width: 280px;
+		}
+	}
+
+	p.lead {
+		text-align: center;
+		color: #666;
+	}
+
+	form.shortcut {
+		text-align: center;
+		margin: 40px auto 0;
+
+		.form-group {
+			margin-right: 5px;
+		}
+	}
+}
+
+nav.navbar {
+	background: linear-gradient(to bottom, rgba(238,238,238,1) 0%, rgba(224,224,224,1) 100%);
+	border-bottom: 1px solid #ccc;
+
+	a {
+		color: $prome-color;
+	}
+
+	.client-name {
+		color: darken($prome-color, 10%);
+	}
+
+	.commander-availability {
+		padding: 20px 15px;
+		font-size: 8pt;
+		text-transform: uppercase;
+		cursor: pointer;
+
+		.glyphicon {
+			border-radius: 50%;
+		}
+
+		&.available {
+			color: $success-color;
+
+			.glyphicon {
+				@extend .glyphicon-ok-sign;
+				box-shadow: 0px 0px 5px 0px rgba(76, 174, 76, 0.75);
+			}
+		}
+
+		&.unavailable {
+			color: $error-color;
+
+			.glyphicon {
+				@extend .glyphicon-exclamation-sign;
+				box-shadow: 0px 0px 5px 0px rgba(212, 63, 58, 0.75);
+			}
+		}
+	}
+}
+
+.sidebar {
+  .nav-header {
+  	text-transform: uppercase;
+  	padding: 0 20px;
+  }
+  	> h4 {
+  		margin-top: 0px;
+  	}
+}
+@media (min-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 50px;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    display: block;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    background-color: #f5f5f5;
+  }
+}
+
+/* Sidebar navigation */
+.nav-sidebar {
+  margin-right: -21px; /* 20px padding + 1px border */
+  margin-bottom: 20px;
+  margin-left: -20px;
+}
+.nav-sidebar > li > a {
+  padding-right: 20px;
+  padding-left: 20px;
+}
+.nav-sidebar > .active > a,
+.nav-sidebar > .active > a:hover,
+.nav-sidebar > .active > a:focus {
+  color: #fff;
+  background-color: #428bca;
+}
+
+
+/*
+ * Main content
+ */
+
+.main {
+	background-color: $console-color;
+	padding: 10px;
+	color: $console-text-color;
+
+	.request {
+		h3 {
+			margin-bottom: 20px;
+
+			span.glyphicon {
+				float: right;
+			}
+
+			.spinner {
+			  width: 30px;
+			  height: 30px;
+			  position: relative;
+			  top: -5px;
+			  display: none;
+			  float: right;
+			}
+
+			.double-bounce1, .double-bounce2 {
+			  width: 30px;
+			  height: 30px;
+			  border-radius: 50%;
+			  background-color: $prome-color;
+			  opacity: 0.6;
+			  position: absolute;
+			  
+			  -webkit-animation: bounce 2.0s infinite ease-in-out;
+			  animation: bounce 2.0s infinite ease-in-out;
+			}
+
+			.double-bounce2 {
+			  -webkit-animation-delay: -1.0s;
+			  animation-delay: -1.0s;
+			}
+
+			.loading-message {
+				color: $prome-color;
+				font-size: 10px;
+				text-transform: uppercase;
+				float: right;
+				padding-top: 5px;
+				margin-right: 10px;
+				opacity: 0.7;
+				display: none;
+			}
+		}
+
+		&.success {
+			h3 {
+				color: $success-color;
+
+				span.glyphicon {
+					@extend .glyphicon-ok;
+				}
+			}
+		}
+
+		&.error {
+			h3 {
+				color: $error-color;
+
+				span.glyphicon {
+					@extend .glyphicon-exclamation-sign;
+				}
+			}
+		}
+
+		&.loading {
+			h3 {
+				.spinner, .loading-message {
+					display: block;
+				}
+			}
+
+			.output {
+				display: none;
+			}
+
+			.btn-send {
+				display: none;
+			}
+		}
+
+		&.template {
+			display: none;
+		}
+
+		&.active {
+			display: block;
+		}
+
+		.output, .info {
+			color: $console-text-color;
+			background-color: $console-color;
+			border: none;
+			border-radius: 0;
+			padding: 20px 0;
+			font-family: Menlo,Monaco,Consolas,"Courier New",monospace !important;
+			line-height: 1.5em;
+			font-size: 12px;
+			border-top: 1px solid #555;
+		}
+
+		.info {
+			font-size: 10px;
+			color: lighten($console-text-color, 20);
+		}
+
+		.btn-send {
+			margin-top: 10px;
+			margin-bottom: 20px;
+		}
+	}
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding-right: 40px;
+    padding-left: 40px;
+  }
+}
+.main .page-header {
+  margin-top: 0;
+}
+
+.action {
+	a {
+		color: darken($prome-color, 10) !important;
+
+		&:hover {
+			color: darken($prome-color, 20) !important;
+			background-color: lighten($console-color, 65) !important;
+		}
+
+		.glyphicon {
+			float: right;
+		}
+	}
+
+	.spinner {
+	  width: 20px;
+	  height: 20px;
+	  position: relative;
+	  top: -30px;
+	  right: 20px;
+	  margin-bottom: -20px;
+	  float: right;
+	  display: none;
+	}
+
+	.double-bounce1, .double-bounce2 {
+	  width: 20px;
+	  height: 20px;
+	  border-radius: 50%;
+	  background-color: $prome-color;
+	  opacity: 0.6;
+	  position: absolute;
+	  
+	  -webkit-animation: bounce 2.0s infinite ease-in-out;
+	  animation: bounce 2.0s infinite ease-in-out;
+	}
+
+	.double-bounce2 {
+	  -webkit-animation-delay: -1.0s;
+	  animation-delay: -1.0s;
+	}
+
+	&.active {
+		a {
+			background-color: lighten($console-color, 50);
+			color: darken($prome-color, 25) !important;
+
+			&:hover, &:focus {
+				background-color: lighten($console-color, 50) !important;
+				color: darken($prome-color, 25) !important;
+			}
+		}
+
+		.spinner {
+			.double-bounce1, .double-bounce2 {
+				background-color: darken($prome-color, 25) !important;
+			}
+		}
+	}
+
+	&.loading {
+		a {
+			@extend .disabled;
+
+			&:hover, &:focus {
+				cursor: default;
+			}
+		}
+
+		.spinner {
+			display: block;
+		}
+	}
+
+	&.success {
+		span.glyphicon {
+			color: $success-color;
+			@extend .glyphicon-ok;
+		}
+	}
+
+	&.error {
+		span.glyphicon {
+			color: $error-color;
+			@extend .glyphicon-exclamation-sign;
+		}
+	}
+
+}
+
+@-webkit-keyframes bounce {
+  0%, 100% { -webkit-transform: scale(0.0) }
+  50% { -webkit-transform: scale(1.0) }
+}
+
+@keyframes bounce {
+  0%, 100% { 
+    transform: scale(0.0);
+    -webkit-transform: scale(0.0);
+  } 50% { 
+    transform: scale(1.0);
+    -webkit-transform: scale(1.0);
+  }
+}
