@@ -15,11 +15,11 @@ angular.module('prome.services')
 					this.requestsWaitingCount++;
 
 					$http.get('http://localhost:7500/execute/' + command, {
-						data: {
+						params: {
 							client: tenantAlias
 						},
 						responseType: 'json',
-						timeout: 60000
+						timeout: 1800000
 					})
 						.success(function(response, status, headers, config) {
 							requestObj.status = 'success';
@@ -31,6 +31,10 @@ angular.module('prome.services')
 								requestObj.status = 'error';
 							}
 
+							if ($rootScope.inspectedPage.activeCommand.alias == command) {
+								requestObj.unread = false;
+							}
+
 							// Reload inspected page if no other requests waiting
 							if (me.requestsWaitingCount == 0) {
 								Messaging.sendRequest({action: 'reload-tab', tabId: chrome.devtools.inspectedWindow.tabId});
@@ -38,11 +42,27 @@ angular.module('prome.services')
 
 							requestObj.info = 'Request completed in ' + Math.round((new Date() - startTime) / 1000) + 's.';
 
-							requestObj.output = $sce.trustAsHtml(response.output);
+							var formatOutput = function(output) {
+								lines = output.split("\n");
+
+								for (i = 0, len = lines.length; i < len; ++i) {
+									lines[i] = String(lines[i]).replace(/\[INF\]/g, '<span style="color: green;">[INF]</span>');
+									lines[i] = String(lines[i]).replace(/\[WRN\]/g, '<span style="color: yellow;">[WRN]</span>');
+									lines[i] = String(lines[i]).replace(/\[ERR\]/g, '<span style="color: red;">[ERR]</span>');
+								}
+
+								return lines.join('<br>');
+							};
+
+							requestObj.output = $sce.trustAsHtml(formatOutput(response.output));
 						})
 						.error(function(response, status, headers, config) {
 							requestObj.status = 'error';
 							me.requestsWaitingCount--;
+
+							if ($rootScope.inspectedPage.activeCommand.alias == command) {
+								requestObj.unread = false;
+							}
 
 							requestObj.info = 'Request failed.';
 						});
