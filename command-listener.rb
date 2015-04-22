@@ -8,14 +8,24 @@ require 'net/scp'
 
 #----------------------------------------------------------------
   
+  # CUSTOM CONFIG
+
   # Path to Prome3 on host machine
-  prome_dir =  ENV['HOME'] + '/Projets/prome3'
+  prome_dir =  ENV['HOME'] + '/Projets/prome3'    # Update this variable with your own local path to Prome
+
+#----------------------------------------------------------------
+  
+  # DEFAULT VARIABLES
+
   # Path to web directory relative
   $web_path = prome_dir + '/web'
+
   # Path to Vagrant SSH key
   $ssh_key = prome_dir + "/puphpet/files/dot/ssh/id_rsa"
+
   # Absolute path for Prome3 on VM
   $base_path = '/vagrant'
+
   # Print debug output in terminal
   $debug = false
 
@@ -33,6 +43,37 @@ require 'net/scp'
   # Sinatra config
   set :protection, false
   set :port, 7500
+
+#----------------------------------------------------------------
+
+  # Define text output colours
+
+  def colorize(text, color_code)
+    "\e[#{color_code}m#{text}\e[0m"
+  end
+
+  def red(text); colorize(text, 31); end
+  def green(text); colorize(text, 32); end
+  def yellow(text); colorize(text, 33); end
+  def blue(text); colorize(text, 34); end
+
+#----------------------------------------------------------------
+
+  # Initial config check before launch
+
+  # Check Prome base directory
+  unless File.directory?(prome_dir) then
+    puts(red("Unable to find Prome directory (" + prome_dir + ") ! Did you forget to change the default config?"))
+    exit
+  end
+
+  # Look for Vagrant SSH key
+  unless File.exists?($ssh_key) then
+    puts(red("Unable to find Vagrant SSH key (" + $ssh_key + ") !"))
+    exit
+  end
+
+  puts(green("Command listener launched from directory " + prome_dir + ""))
 
 #----------------------------------------------------------------
 
@@ -186,8 +227,7 @@ get '/execute/:command' do
 
   case params['command']
   when 'create-database'
-    command = "php bin/console doctrine:database:create"
-    command += " && php bin/console doctrine:migrations:migrate --no-interaction"
+    command = "php bin/phing create-database"
 
     exec_vm_command(command).to_json
 
@@ -197,8 +237,7 @@ get '/execute/:command' do
   when 'reset-setup'
     command = "php bin/console doctrine:database:drop --force"
     command += " && composer install"
-    command += " && php bin/console doctrine:database:create"
-    command += " && php bin/console doctrine:migrations:migrate --no-interaction"
+    command += " && php bin/phing create-database"
     command += " && php bin/console doctrine:fixtures:load --fixtures=app/DoctrineFixtures/Common --no-interaction -v"
 
     if client
