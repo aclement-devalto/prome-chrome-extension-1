@@ -2,7 +2,9 @@
     "name": "Prome Developer Tools",
     "version": "1.0.0",
     "description": "Devtools for Prome 3",
+    "default_locale": "en",
     "devtools_page": "devtools.html",
+    "author": "Alexandre Clément - DevAlto",
     "background": {
         "scripts": [
             "js/background.js"
