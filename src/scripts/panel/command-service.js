@@ -35,6 +35,11 @@ angular.module('prome.services')
 								requestObj.unread = false;
 							}
 
+							// Database cleaned : log out user to prevent 'User not found' exception
+							if (command == 'create-database' || command == 'drop-database' || command == 'reset-setup') {
+								Messaging.sendRequest({action: 'code', tabId: chrome.devtools.inspectedWindow.tabId, content: "localStorage.removeItem('prome_user');"});
+							}
+
 							// Reload inspected page if no other requests waiting
 							if (me.requestsWaitingCount == 0) {
 								Messaging.sendRequest({action: 'reload-tab', tabId: chrome.devtools.inspectedWindow.tabId});
