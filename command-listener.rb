@@ -99,7 +99,9 @@ require 'net/scp'
       exit_signal = nil
 
       if $debug then
-        puts "----------------------------------------------------------------"
+        puts blue("<DEBUG>") + "\n"
+        puts yellow("Command:")
+
         puts command
       end
 
@@ -131,16 +133,21 @@ require 'net/scp'
 
       # Debug output
       if $debug then
-        puts "----------------------------------------------------------------"
+        puts "\n----------------------------------------------------------------\n"
+        puts yellow("Output:")
         puts stdout
-        puts "----------------------------------------------------------------"
-        puts stderr
-        puts "----------------------------------------------------------------"
+        puts "\n----------------------------------------------------------------\n"
+        unless stderr == ""
+          puts yellow("Error:")
+          puts red(stderr)
+          puts "----------------------------------------------------------------"
+        end
+        puts yellow("Exit status:") 
         puts exit_code
-        puts "----------------------------------------------------------------"
+        puts "\n" + blue("</DEBUG>")
       end
 
-      {:result => !!exit_code, :output => stdout.force_encoding("utf-8"), :error => stderr.force_encoding("utf-8")}
+      {:result => exit_code == 0, :output => stdout.force_encoding("utf-8"), :error => stderr.force_encoding("utf-8")}
   end
 
 #----------------------------------------------------------------
@@ -160,7 +167,9 @@ require 'net/scp'
 
     # Debug output
     if $debug then
-      puts "----------------------------------------------------------------"
+      puts blue("<DEBUG>") + "\n"
+      puts yellow("Command:")
+
       puts sencha_command
     end
 
@@ -169,13 +178,20 @@ require 'net/scp'
 
     # Debug output
     if $debug then
-      puts "----------------------------------------------------------------"
+      puts "\n----------------------------------------------------------------\n"
+      puts yellow("Output:")
       puts stdout
-      puts "----------------------------------------------------------------"
-      puts stderr
-      puts "----------------------------------------------------------------"
-      puts exit_status
-      puts "----------------------------------------------------------------"
+      puts "\n----------------------------------------------------------------\n"
+
+      unless stderr == ""
+        puts yellow("Error:")
+        puts red(stderr)
+        puts "----------------------------------------------------------------"
+      end
+
+      puts yellow("Exit status:")
+      puts exit_status.exitstatus
+      puts "\n" + blue("<DEBUG>")
     end
 
     {:result => exit_status.success?, :output => stdout, :error => stderr}

@@ -27,8 +27,10 @@ angular.module('prome.services')
 
 							if (response.result) {
 								requestObj.status = 'success';
+								requestObj.info = 'Request completed in ' + Math.round((new Date() - startTime) / 1000) + 's.';
 							} else {
 								requestObj.status = 'error';
+								requestObj.info = 'Request failed.';
 							}
 
 							if ($rootScope.inspectedPage.activeCommand.alias == command) {
@@ -41,11 +43,9 @@ angular.module('prome.services')
 							}
 
 							// Reload inspected page if no other requests waiting
-							if (me.requestsWaitingCount == 0) {
+							if (response.result && me.requestsWaitingCount == 0) {
 								Messaging.sendRequest({action: 'reload-tab', tabId: chrome.devtools.inspectedWindow.tabId});
 							}
-
-							requestObj.info = 'Request completed in ' + Math.round((new Date() - startTime) / 1000) + 's.';
 
 							var formatOutput = function(output) {
 								lines = output.split("\n");
@@ -59,7 +59,11 @@ angular.module('prome.services')
 								return lines.join('<br>');
 							};
 
-							requestObj.output = $sce.trustAsHtml(formatOutput(response.output));
+							if (response.result) {
+								requestObj.output = $sce.trustAsHtml(formatOutput(response.output));
+							} else {
+								requestObj.output = $sce.trustAsHtml('<span style="color: red;">' + formatOutput(response.error) + '</span>');
+							}
 						})
 						.error(function(response, status, headers, config) {
 							requestObj.status = 'error';
