@@ -263,7 +263,12 @@ get '/execute/:command' do
 
     exec_vm_command(command).to_json
 
-  when 'load-fixtures'
+  when 'load-common-fixtures'
+    command = "php bin/console doctrine:fixtures:load --fixtures=app/DoctrineFixtures/Common --no-interaction -v"
+    
+    exec_vm_command(command).to_json
+
+  when 'load-tenant-fixtures'
     if client
       client = client.split('-').select {|w| w.capitalize! || w }.join('');
       command = "php bin/console doctrine:fixtures:load --append --fixtures=app/DoctrineFixtures/" + client + " --no-interaction -v"
