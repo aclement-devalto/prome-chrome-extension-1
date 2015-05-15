@@ -13,11 +13,11 @@ angular.module('prome.controllers')
 						actions:
 							{
 								'create-database': {
-									title: 'Database creation',
+									title: 'Creating database',
 									label: 'create'
 								},
 								'drop-database': {
-									title: 'Drop database',
+									title: 'Dropping database',
 									label: 'drop',
 									confirm: 'Do you really want to drop the database ?'
 								}
@@ -29,15 +29,19 @@ angular.module('prome.controllers')
 						actions:
 							{
 								'reset-setup': {
-									title: 'Reset setup',
+									title: 'Reset backend setup',
 									label: 'reset setup'
 								},
-								'load-fixtures': {
-									title: 'Load fixtures',
-									label: 'load fixtures'
+								'load-common-fixtures': {
+									title: 'Loading common fixtures',
+									label: 'load common fixtures'
+								},
+								'load-tenant-fixtures': {
+									title: 'Loading tenant fixtures',
+									label: 'load tenant fixtures'
 								},
 								'clear-cache': {
-									title: 'Clear cache',
+									title: 'Clearing backend cache',
 									label: 'clear cache'
 								}
 							}
@@ -48,8 +52,8 @@ angular.module('prome.controllers')
 						actions:
 							{
 								'sencha-build': {
-									title: 'Building front-end resources',
-									label: 'build'
+									title: 'Building front-end',
+									label: 'build all'
 								}
 							}
 					},
@@ -59,7 +63,7 @@ angular.module('prome.controllers')
 						actions:
 							{
 								'sencha-resources': {
-									title: 'Resources copy',
+									title: 'Copying resources',
 									label: 'copy'
 								}
 							}
@@ -70,11 +74,11 @@ angular.module('prome.controllers')
 						actions:
 							{
 								'sencha-refresh': {
-									title: 'Javascript files refresh',
-									label: 'refresh'
+									title: 'Refresh Javascript files index',
+									label: 'refresh index'
 								},
 								'sencha-build-js': {
-									title: 'Javascript files build',
+									title: 'Compiling Javascript files',
 									label: 'build'
 								}
 							}
@@ -85,7 +89,7 @@ angular.module('prome.controllers')
 						actions:
 							{
 								'sencha-ant-sass': {
-									title: 'SASS compile',
+									title: 'Compiling SASS',
 									label: 'compile'
 								}
 							}
