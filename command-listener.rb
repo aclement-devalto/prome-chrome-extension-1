@@ -23,6 +23,9 @@ require 'net/scp'
   # Path to Vagrant SSH key
   $ssh_key = prome_dir + "/puphpet/files/dot/ssh/id_rsa"
 
+  # Virtual machine hostname
+  $vm_hostname = "192.168.56.101"
+
   # Absolute path for Prome3 on VM
   $base_path = '/vagrant'
 
@@ -81,7 +84,7 @@ require 'net/scp'
 
   def exec_vm_command(command)
     # Connect to VM using SSH key
-    ssh = Net::SSH.start("192.168.56.101", "vagrant", {:keys => [$ssh_key]})
+    ssh = Net::SSH.start($vm_hostname, "vagrant", {:keys => [$ssh_key]})
 
     command = "cd " + $base_path + " && " + command
 
