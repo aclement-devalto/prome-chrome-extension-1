@@ -3,5 +3,7 @@
 /extension/css/*
 /extension/vendors/*
 /src/styles/temp/*
+/daemons/logs/*
+/daemons/*.pid
 .DS_Store
 .idea/*
