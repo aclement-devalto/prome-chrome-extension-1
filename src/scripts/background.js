@@ -20,7 +20,6 @@ chrome.runtime.onConnect.addListener(function (port) {
 	if (port.name !== 'devtools') return;
 
 	var extensionListener = function (message) {
-		console.log(JSON.stringify(message));
 
 		switch (message.action) {
 			case 'code':

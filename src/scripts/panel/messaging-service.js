@@ -46,6 +46,10 @@ angular.module('prome.services')
 				});
 			};
 
+			Messaging.initWebSocket = function() {
+				return new WebSocket('ws://localhost:7500/socket');
+			};
+			
 			Messaging.init();
 
 			return Messaging;

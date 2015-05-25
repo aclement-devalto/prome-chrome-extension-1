@@ -59,7 +59,7 @@ angular.module('prome.services')
 								return lines.join('<br>');
 							};
 
-							if (response.result) {
+							if (response.result || !response.error) {
 								requestObj.output = $sce.trustAsHtml(formatOutput(response.output));
 							} else {
 								requestObj.output = $sce.trustAsHtml('<span style="color: red;">' + formatOutput(response.error) + '</span>');
