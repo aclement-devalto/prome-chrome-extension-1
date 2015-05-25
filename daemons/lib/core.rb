@@ -27,7 +27,7 @@ require_relative 'toolbox'
 	$debug = true
 
 	# Listening port
-	$listening_post = 7500
+	$listening_port = 7500
 
 #----------------------------------------------------------------
 
