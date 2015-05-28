@@ -64,7 +64,11 @@ class Commander
 
 		@logger.info("Exit status: " + exit_code.to_s)
 
-		{:result => exit_code, :output => stdout.force_encoding("utf-8"), :error => stderr.force_encoding("utf-8")}
+		{
+			:result => exit_code == 0,
+			:output => stdout.force_encoding("utf-8"),
+			:error => stderr.force_encoding("utf-8")
+		}
 	end
 
 	#----------------------------------------------------------------
@@ -115,7 +119,11 @@ class Commander
 
 		@logger.info("Exit status: " + exit_status.exitstatus.to_s)
 
-		{:result => exit_status.success?, :output => stdout, :error => stderr}
+		{
+			:result => exit_status.success?,
+			:output => stdout.force_encoding("ISO-8859-1").encode("UTF-8"),
+			:error => stderr.force_encoding("ISO-8859-1").encode("UTF-8")
+		}
 	end
 
 	#----------------------------------------------------------------
