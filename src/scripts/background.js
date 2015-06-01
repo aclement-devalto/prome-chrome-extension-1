@@ -16,6 +16,48 @@ var tenants = [
 	}
 ];
 
+var tabs = [];
+
+// Instantiate websocket connection with Listener
+var webSocket = new WebSocket('ws://localhost:7500/socket');
+webSocket.onmessage = function(m) {
+	var message = JSON.parse(m.data);
+	switch(message.action) {
+		case 'watcher-rebuild':
+			// Reload Prome tabs for this tenant
+			for (var tabId in tabs) {
+				if( tabs.hasOwnProperty( tabId ) ) {
+					console.log(tabs[tabId]);
+					if (tabs[tabId].isProme === true && tabs[tabId].tenant.alias == message.tenant) {
+						chrome.tabs.reload(message.tabId);
+					}
+				}
+			}
+			break;
+	}
+};
+
+// Keep track of which open tabs are Prome
+chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tabObj){
+	if (changeInfo.url) {
+		var host = getLocationHost(changeInfo.url);
+
+		if (tabs[tabId]) {
+			var tab = tabs[tabId];
+
+			// Check if tab hostname changed
+			if (tab.host != host) {
+				// Update saved tab info
+				tabs[tabId] = getTabInfo(changeInfo.url);
+			}
+		} else {
+			// Save new tab with tab info
+			tabs[tabId] = getTabInfo(changeInfo.url);
+		}
+	}
+});
+
+// Listen to internal messaging from inspected pages or devtools panel
 chrome.runtime.onConnect.addListener(function (port) {
 	if (port.name !== 'devtools') return;
 
@@ -32,56 +74,18 @@ chrome.runtime.onConnect.addListener(function (port) {
 			break;
 			case 'init':
 				chrome.tabs.get(message.tabId, function(tab){
-					var parseUrl = function(href) {
-						var l = document.createElement("a");
-						l.href = href;
-						return l;
-					};
+					var location = tab.url;
 
-					var location = tab.url,
-						host = String(parseUrl(location).hostname),
-						isProme = false,
-						tenantAlias = null,
-						env = null;
-
-					// Check if inspected page is from Prome Web
-					if (host.match(/prome.(dev|prod)/i)) {
-						isProme = true;
-
-						// Extract tenant alias from host
-						tenantAlias = String(host.replace(/.?prome.(dev|prod)/i, ''));
-
-						// Extract dev environment from host
-						if (host.match(/prome.dev/i)) {
-							env = 'dev';
-						} else {
-							env = 'prod';
-						}
-					}
-
-					var currentTenant = null;
-
-					// Find corresponding tenant
-					for(var i = 0; i < tenants.length; i++) {
-						var tenant = tenants[i];
-
-						if (tenant.alias == tenantAlias) {
-							currentTenant = tenant;
-						}
-					}
+					var tabInfo = getTabInfo(location);
 
 					// Send page info back to the panel
 					port.postMessage({
 						type: 'inspected-page',
-						content: {
+						content: mergeObjects(tabInfo, {
 							tabId: message.tabId,
 							location: location,
-							host: host,
-							isProme: isProme,
-							tenant: currentTenant,
-							env: env,
 							requests: {}
-						}
+						})
 					});
 				});
 				break;
@@ -93,7 +97,7 @@ chrome.runtime.onConnect.addListener(function (port) {
 			break;
 			case 'reload-tab':
 				// Reload tab
-				chrome.tabs.reload(message.tabId);
+				chrome.tabs.reload(message.tabId, {bypassCache: true});
 				break;
 			default:
 				//Pass message to inspectedPage
@@ -117,3 +121,85 @@ chrome.runtime.onConnect.addListener(function (port) {
     });
 
 });
+
+var mergeObjects = function(target, source) {
+
+	/* Merges two (or more) objects,
+	 giving the last one precedence */
+
+	if ( typeof target !== 'object' ) {
+		target = {};
+	}
+
+	for (var property in source) {
+
+		if ( source.hasOwnProperty(property) ) {
+
+			var sourceProperty = source[ property ];
+
+			if ( typeof sourceProperty === 'object' ) {
+				target[ property ] = mergeObjects( target[ property ], sourceProperty );
+				continue;
+			}
+
+			target[ property ] = sourceProperty;
+
+		}
+
+	}
+
+	for (var a = 2, l = arguments.length; a < l; a++) {
+		mergeObjects(target, arguments[a]);
+	}
+
+	return target;
+};
+
+var parseTabUrl = function(href) {
+	var l = document.createElement("a");
+	l.href = href;
+	return l;
+};
+
+var getLocationHost = function(location) {
+	return String(parseTabUrl(location).hostname);
+};
+
+var getTabInfo = function(location) {
+	var host = getLocationHost(location),
+		isProme = false,
+		tenantAlias = null,
+		env = null,
+		currentTenant = null;
+
+	// Check if inspected page is from Prome Web
+	if (host.match(/prome.(dev|prod)/i)) {
+		isProme = true;
+
+		// Extract tenant alias from host
+		tenantAlias = String(host.replace(/.?prome.(dev|prod)/i, ''));
+
+		// Extract dev environment from host
+		if (host.match(/prome.dev/i)) {
+			env = 'dev';
+		} else {
+			env = 'prod';
+		}
+	}
+
+	// Find corresponding tenant
+	for(var i = 0; i < tenants.length; i++) {
+		var tenant = tenants[i];
+
+		if (tenant.alias == tenantAlias) {
+			currentTenant = tenant;
+		}
+	}
+
+	return {
+		host: host,
+		isProme: isProme,
+		tenant: currentTenant,
+		env: env
+	}
+};

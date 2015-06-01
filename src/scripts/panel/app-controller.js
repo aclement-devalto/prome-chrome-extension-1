@@ -105,7 +105,7 @@ angular.module('prome.controllers')
 			$scope.isCommanderAvailable = function() {
 				return Commander.getStatus();
 			};
-			$scope.webSocket = Messaging.initWebSocket();
+			//$scope.webSocket = Messaging.initWebSocket();
 
 			/**
 			 * Manually refresh current inspected page
@@ -193,17 +193,10 @@ angular.module('prome.controllers')
 				//	angular.element(document.body).scope().refreshCurrentPage();
 				//});
 
-				$scope.webSocket.onmessage = function(m) {
+				/*$scope.webSocket.onmessage = function(m) {
 		        	switch(m.data) {
-						case 'watcher-rebuild-js':
-						case 'watcher-rebuild-sass':
-							// Reload inspected page if no other requests waiting
-							if (Commander.requestsWaitingCount == 0) {
-								Messaging.sendRequest({action: 'reload-tab', tabId: chrome.devtools.inspectedWindow.tabId});
-							}
-							break;
 		        	}
-		        };
+		        };*/
 
 		        // ws.onopen    = function()  { console.log('websocket opened'); };
 		        // ws.onclose   = function()  { console.log('websocket closed'); };
