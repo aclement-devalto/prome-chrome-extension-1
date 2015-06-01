@@ -47,7 +47,7 @@ module Toolbox
 		data.gsub!(/\e\[0m/, '</span>')
 		data.gsub!(/\n/, '<br>')
 
-		return data
+		data
 	end
 
 	#----------------------------------------------------------------
@@ -63,6 +63,10 @@ module Toolbox
 		else
 			"undp-mwi"
 		end
+	end
+
+	def self.get_tenant_name(tenant_alias)
+		tenant_alias.split('-').first.upcase
 	end
 end
 

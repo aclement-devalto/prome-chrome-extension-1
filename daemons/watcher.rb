@@ -13,6 +13,8 @@ class Watcher
 			:sass	=>	'/web/packages'
 		}
 
+		@parallel_operations = 0
+
 		#----------------------------------------------------------------
 
 		@logger = Logger.new(File.dirname(__FILE__) + '/logs/watcher.log')
@@ -31,13 +33,20 @@ class Watcher
 					@logger.debug(" -- Removed files: #{removed}")
 				end
 
-				client = Toolbox.get_current_tenant
+				tenant = Toolbox.get_current_tenant
 
-				result = @commander.execute('sencha-refresh', client)
+				@parallel_operations += 1
+				result = @commander.execute('sencha-refresh', tenant)
+				@parallel_operations -= 1
 
 				# Notify listener of the rebuild
-				uri = URI('http://localhost:' + $listening_port.to_s + '/watcher-rebuild')
-				res = Net::HTTP.post_form(uri, 'type' => 'js')
+				if result[:result]
+					uri = URI('http://localhost:' + $listening_port.to_s + '/watcher-rebuild')
+					res = Net::HTTP.post_form(uri,
+					                          'type' => 'js',
+					                          'tenant' => tenant,
+					                          'refresh' => @parallel_operations == 0)
+				end
 			end
 		end
 
@@ -48,13 +57,20 @@ class Watcher
 				@logger.debug(" -- Removed files: #{removed}")
 			end
 
-			client = Toolbox.get_current_tenant
+			tenant = Toolbox.get_current_tenant
 
-			result = @commander.execute('sencha-ant-sass', client)
+			@parallel_operations += 1
+			result = @commander.execute('sencha-ant-sass', tenant)
+			@parallel_operations -= 1
 
 			# Notify listener of the rebuild
-			uri = URI('http://localhost:' + $listening_port.to_s + '/watcher-rebuild')
-			res = Net::HTTP.post_form(uri, 'type' => 'sass')
+			if result[:result]
+				uri = URI('http://localhost:' + $listening_port.to_s + '/watcher-rebuild')
+				res = Net::HTTP.post_form(uri,
+				                          'type' => 'sass',
+				                          'tenant' => tenant,
+				                          'refresh' => @parallel_operations == 0)
+			end
 		end
 
 		@js_listener.start

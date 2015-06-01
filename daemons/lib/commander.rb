@@ -137,10 +137,10 @@ class Commander
 			when 'create-database'
 				command = "php bin/phing create-database"
 
-				exec_vm_command(command).to_json
+				exec_vm_command(command)
 
 			when 'drop-database'
-				exec_vm_command("php bin/console doctrine:database:drop --force").to_json
+				exec_vm_command("php bin/console doctrine:database:drop --force")
 
 			when 'reset-setup'
 				command = "php bin/console doctrine:database:drop --force"
@@ -153,12 +153,12 @@ class Commander
 					command += " && php bin/console doctrine:fixtures:load --append --fixtures=app/DoctrineFixtures/" + client + " --no-interaction -v"
 				end
 
-				exec_vm_command(command).to_json
+				exec_vm_command(command)
 
 			when 'load-common-fixtures'
 				command = "php bin/console doctrine:fixtures:load --fixtures=app/DoctrineFixtures/Common --no-interaction -v"
 
-				exec_vm_command(command).to_json
+				exec_vm_command(command)
 
 			when 'load-tenant-fixtures'
 				if client
@@ -169,25 +169,25 @@ class Commander
 					command = "php bin/console doctrine:fixtures:load --append --fixtures=app/DoctrineFixtures/" + client + " --no-interaction -v"
 				end
 
-				exec_vm_command(command).to_json
+				exec_vm_command(command)
 
 			when 'clear-cache'
-				exec_vm_command("php bin/console cache:clear --env=dev").to_json
+				exec_vm_command("php bin/console cache:clear --env=dev")
 
 			when 'sencha-build'
-				exec_sencha_command("app build --clean", client).to_json
+				exec_sencha_command("app build --clean", client)
 
 			when 'sencha-resources'
-				exec_sencha_command("ant resources", client).to_json
+				exec_sencha_command("ant resources", client)
 
 			when 'sencha-refresh'
-				exec_sencha_command("app refresh", client).to_json
+				exec_sencha_command("app refresh", client)
 
 			when 'sencha-build-js'
-				exec_sencha_command("ant js", client).to_json
+				exec_sencha_command("ant js", client)
 
 			when 'sencha-ant-sass'
-				exec_sencha_command("ant sass", client).to_json
+				exec_sencha_command("ant sass", client)
 
 			else
 				@logger.error("Unknown command received: " + command_name)
