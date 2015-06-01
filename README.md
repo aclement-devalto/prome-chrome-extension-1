@@ -22,7 +22,8 @@ The file watcher daemon is a ruby script continuously running and watching JS an
 2. Configure the Command listener daemons:
    * Open the file **/daemons/lib/core.rb** and make sure the variable **PROME_DIR** points to your Prome directory.
    _Should be the path relative to your home directory._
-3. Install Ruby dependencies by running the following command in the extension directory:
+3. Install Ruby dependencies:
+   * Run the following command in the extension directory:
    ```
    bundle install
    ```
