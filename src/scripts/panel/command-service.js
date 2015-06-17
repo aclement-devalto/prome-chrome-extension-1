@@ -77,6 +77,18 @@ angular.module('prome.services')
 						//console.log('Response from dispatcher:');
 						//console.log(response);
 
+						var formatOutput = function (output) {
+							lines = output.split("\n");
+
+							for (i = 0, len = lines.length; i < len; ++i) {
+								lines[i] = String(lines[i]).replace(/\[INF\]/g, '<span style="color: green;">[INF]</span>');
+								lines[i] = String(lines[i]).replace(/\[WRN\]/g, '<span style="color: yellow;">[WRN]</span>');
+								lines[i] = String(lines[i]).replace(/\[ERR\]/g, '<span style="color: red;">[ERR]</span>');
+							}
+
+							return lines.join('<br>');
+						};
+
 						$rootScope.$apply(function () {
 							if (response.status) {
 								requestObj.status = 'success';
@@ -101,23 +113,7 @@ angular.module('prome.services')
 									Messaging.sendRequest({action: 'reload-tab', tabId: chrome.devtools.inspectedWindow.tabId});
 								}
 
-								var formatOutput = function (output) {
-									lines = output.split("\n");
-
-									for (i = 0, len = lines.length; i < len; ++i) {
-										lines[i] = String(lines[i]).replace(/\[INF\]/g, '<span style="color: green;">[INF]</span>');
-										lines[i] = String(lines[i]).replace(/\[WRN\]/g, '<span style="color: yellow;">[WRN]</span>');
-										lines[i] = String(lines[i]).replace(/\[ERR\]/g, '<span style="color: red;">[ERR]</span>');
-									}
-
-									return lines.join('<br>');
-								};
-
-								if (!response.error) {
-									requestObj.output = $sce.trustAsHtml(formatOutput(response.output));
-								} else {
-									requestObj.output = $sce.trustAsHtml('<span style="color: red;">' + formatOutput(response.error) + '</span>');
-								}
+								requestObj.output = $sce.trustAsHtml(formatOutput(response.output));
 							} else {
 								requestObj.status = 'error';
 								me.requestsWaitingCount--;
@@ -126,7 +122,13 @@ angular.module('prome.services')
 									requestObj.unread = false;
 								}
 
-								requestObj.info = 'Request failed: ' + response.error;
+								if (response.error) {
+									requestObj.output = $sce.trustAsHtml('<span style="color: red;">' + formatOutput(response.error) + '</span>');
+								} else {
+									requestObj.output = $sce.trustAsHtml(formatOutput(response.output));
+								}
+
+								requestObj.info = 'Request failed.';
 							}
 
 							me.completeTask(task, response);
