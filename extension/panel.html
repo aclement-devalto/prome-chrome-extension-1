@@ -54,7 +54,7 @@
 			<div class="col-sm-3 col-md-2 sidebar">
 				<ul class="nav nav-sidebar" ng-repeat="(commandAlias, command) in commands">
 					<li class="nav-header">{{command.title}}</li>
-					<li class="action" ng-class="{active: inspectedPage.activeCommand.alias == actionAlias, loading: inspectedPage.requests[actionAlias].status == 'loading', success: inspectedPage.requests[actionAlias].status == 'success' && inspectedPage.requests[actionAlias].unread, error: inspectedPage.requests[actionAlias].status == 'error' && inspectedPage.requests[actionAlias].unread}" ng-repeat="(actionAlias, action)  in command.actions"><a href="#" ng-click="switchCommand(actionAlias, commandAlias)" ng-dblclick="switchCommand(actionAlias, commandAlias, true)">{{action.label}}<span class="glyphicon"></span></a><div class="spinner"><div class="double-bounce1"></div><div class="double-bounce2"></div></div></li>
+					<li class="action" ng-class="{active: inspectedPage.activeCommand.alias == actionAlias, loading: inspectedPage.requests[actionAlias].status == 'loading', success: inspectedPage.requests[actionAlias].status == 'success' && inspectedPage.requests[actionAlias].unread == true, error: inspectedPage.requests[actionAlias].status == 'error' && inspectedPage.requests[actionAlias].unread == true}" ng-repeat="(actionAlias, action)  in command.actions"><a href="#" ng-click="switchCommand(actionAlias, commandAlias)" ng-dblclick="switchCommand(actionAlias, commandAlias, true)">{{action.label}}<span class="glyphicon"></span></a><div class="spinner"><div class="double-bounce1"></div><div class="double-bounce2"></div></div></li>
 				</ul>
 			</div>
 			<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

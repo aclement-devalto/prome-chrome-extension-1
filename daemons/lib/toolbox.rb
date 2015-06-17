@@ -68,6 +68,90 @@ module Toolbox
 	def self.get_tenant_name(tenant_alias)
 		tenant_alias.split('-').first.upcase
 	end
+
+	def self.get_notification_message(command_alias, result, tenant)
+		tenant_name = self.get_tenant_name(tenant)
+
+		case command_alias
+			when 'create-database'
+				notification = {
+					:success => 'Created database',
+					:error => 'Database creation failed'
+				}
+
+			when 'drop-database'
+				notification = {
+					:success => 'Dropped database',
+					:error => 'Database drop failed'
+				}
+
+			when 'reset-setup'
+				notification = {
+					:success => 'Reset development setup',
+					:error => 'Setup reset failed'
+				}
+
+			when 'load-common-fixtures'
+				notification = {
+					:success => 'Loaded common fixtures into database',
+					:error => 'Common fixtures loading failed'
+				}
+
+			when 'load-tenant-fixtures'
+				notification = {
+					:success => "Loaded #{tenant_name} fixtures into database",
+					:error => "#{tenant_name} fixtures loading failed"
+				}
+
+			when 'clear-cache'
+				notification = {
+					:success => 'Cleared cache',
+					:error => 'Failed to clear cache'
+				}
+
+			when 'sencha-build'
+				notification = {
+					:success => 'Completed front-end build',
+					:error => 'Front-end build failed'
+				}
+
+			when 'sencha-resources'
+				notification = {
+					:success => 'Copied front-end resources',
+					:error => 'Failed to copy resources'
+				}
+
+			when 'sencha-refresh'
+				notification = {
+					:success => 'Refreshed Javascript files index',
+					:error => 'Javascript files index failed'
+				}
+
+			when 'sencha-build-js'
+				notification = {
+					:success => 'Completed Javascript build',
+					:error => 'Javascript build failed'
+				}
+
+			when 'sencha-ant-sass'
+				notification = {
+					:success => 'Completed SASS compilation',
+					:error => 'SASS compilation failed'
+				}
+		end
+
+		if result
+			notification[:success]
+		else
+			notification[:error]
+		end
+	end
+
+	def self.notify(message, tenant)
+		tenant_name = self.get_tenant_name(tenant)
+
+		TerminalNotifier.notify(message,  :title => 'Prome 3 - ' + tenant_name)
+	end
 end
 
 #----------------------------------------------------------------

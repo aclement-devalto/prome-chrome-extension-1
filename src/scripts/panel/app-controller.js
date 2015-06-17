@@ -30,7 +30,8 @@ angular.module('prome.controllers')
 							{
 								'reset-setup': {
 									title: 'Reset backend setup',
-									label: 'reset setup'
+									label: 'reset setup',
+									reload: true
 								},
 								'load-common-fixtures': {
 									title: 'Loading common fixtures',
@@ -38,7 +39,8 @@ angular.module('prome.controllers')
 								},
 								'load-tenant-fixtures': {
 									title: 'Loading tenant fixtures',
-									label: 'load tenant fixtures'
+									label: 'load tenant fixtures',
+									reload: true
 								},
 								'clear-cache': {
 									title: 'Clearing backend cache',
@@ -53,7 +55,8 @@ angular.module('prome.controllers')
 							{
 								'sencha-build': {
 									title: 'Building front-end',
-									label: 'build all'
+									label: 'build all',
+									reload: true
 								}
 							}
 					},
@@ -64,7 +67,8 @@ angular.module('prome.controllers')
 							{
 								'sencha-resources': {
 									title: 'Copying resources',
-									label: 'copy'
+									label: 'copy',
+									reload: true
 								}
 							}
 					},
@@ -75,11 +79,13 @@ angular.module('prome.controllers')
 							{
 								'sencha-refresh': {
 									title: 'Refresh Javascript files index',
-									label: 'refresh index'
+									label: 'refresh index',
+									reload: true
 								},
 								'sencha-build-js': {
 									title: 'Compiling Javascript files',
-									label: 'build'
+									label: 'build',
+									reload: true
 								}
 							}
 					},
@@ -90,7 +96,8 @@ angular.module('prome.controllers')
 							{
 								'sencha-ant-sass': {
 									title: 'Compiling SASS',
-									label: 'compile'
+									label: 'compile',
+									reload: true
 								}
 							}
 					}
@@ -188,19 +195,6 @@ angular.module('prome.controllers')
 			};
 
 			$scope.init = function() {
-				// Refresh current tab on page focus
-				//$window.addEventListener('focus', function(){
-				//	angular.element(document.body).scope().refreshCurrentPage();
-				//});
-
-				/*$scope.webSocket.onmessage = function(m) {
-		        	switch(m.data) {
-		        	}
-		        };*/
-
-		        // ws.onopen    = function()  { console.log('websocket opened'); };
-		        // ws.onclose   = function()  { console.log('websocket closed'); };
-
 				Messaging.sendRequest({action: 'init', tabId: chrome.devtools.inspectedWindow.tabId});
 			};
 

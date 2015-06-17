@@ -1,9 +1,10 @@
 require 'net/ssh/gateway'
 require 'open3'
 require 'json'
+require 'daemons'
+require 'timeout'
 
 class Commander
-
 	def initialize
 		@logger = Logger.new(File.dirname(__FILE__) + '/../logs/commander.log')
 
@@ -47,25 +48,8 @@ class Commander
 		end
 		ssh.loop
 
-		# Debug output
-		if $debug
-			@logger.info("----------------------------------------------------------------")
-			@logger.info("[OUTPUT]")
-			@logger.debug(stdout)
-			@logger.info("----------------------------------------------------------------")
-		end
-
-		unless stderr == ""
-			@logger.info("----------------------------------------------------------------")
-			@logger.info("[ERROR]")
-			@logger.error(stderr)
-			@logger.info("----------------------------------------------------------------")
-		end
-
-		@logger.info("Exit status: " + exit_code.to_s)
-
 		{
-			:result => exit_code == 0,
+			:status => exit_code == 0,
 			:output => stdout.force_encoding("utf-8"),
 			:error => stderr.force_encoding("utf-8")
 		}
@@ -75,123 +59,183 @@ class Commander
 
 	# Connect to VM via SSH to execute a shell command
 
-	def exec_vm_command(command)
+	def exec_vm_command(task)
 		# Connect to VM using SSH key
 		ssh = Net::SSH.start($vm_hostname, "vagrant", {:keys => [$ssh_key]})
 
-		command = "cd " + $base_path + " && " + command
+		script = "cd " + $base_path + " && " + task[:script]
 
-		result = ssh_exec! ssh, command
+		response = ssh_exec! ssh, script
+
+		task[:status] = response[:status]
+		task[:output] = response[:output]
+		task[:error] = response[:error]
+
+		task
 	end
 
 	#----------------------------------------------------------------
 
 	# Execute a Sencha command in the web folder
 
-	def exec_sencha_command(command, client)
+	def exec_sencha_command(task)
 		sencha_command = "sencha"
 
-		if client
-			sencha_command += " config -prop app.theme=tenant-" + client + " then"
+		if task[:client]
+			sencha_command += " config -prop app.theme=tenant-" + task[:client] + " then"
 		end
 
-		sencha_command += " " + command
+		sencha_command += " " + task[:script]
 
 		Dir.chdir($web_path)
 
 		# Execute shell command and retrieve result
 		stdout, stderr, exit_status = Open3.capture3(sencha_command)
 
-		# Debug output
-		if $debug
-			@logger.info("----------------------------------------------------------------")
-			@logger.info("[OUTPUT]")
-			@logger.debug(stdout)
-			@logger.info("----------------------------------------------------------------")
-		end
+		task[:status] = exit_status.success?
+		task[:output] = stdout.force_encoding("ISO-8859-1").encode("UTF-8")
+		task[:error] = stderr.force_encoding("ISO-8859-1").encode("UTF-8")
 
-		unless stderr == ""
-			@logger.info("----------------------------------------------------------------")
-			@logger.info("[ERROR]")
-			@logger.error(stderr)
-			@logger.info("----------------------------------------------------------------")
-		end
-
-		@logger.info("Exit status: " + exit_status.exitstatus.to_s)
-
-		{
-			:result => exit_status.success?,
-			:output => stdout.force_encoding("ISO-8859-1").encode("UTF-8"),
-			:error => stderr.force_encoding("ISO-8859-1").encode("UTF-8")
-		}
+		task
 	end
 
 	#----------------------------------------------------------------
 
-	def execute(command_name, client)
-		if $debug
-			@logger.info("Executing " + command_name + " for client " + client)
+	# Receive command order and process it
+
+	def process(command_alias, tenant)
+		# Format alternate version of tenant alias for backend scripts
+		camelcase_tenant = tenant.split('-').select { |w| w.capitalize! || w }.join('')
+
+		available_tasks = {
+			'create-database' => {
+				:alias => 'create-database',
+				:script => "php bin/phing create-database",
+				:type => 'backend',
+				:cancellable => true,
+				:wait_for => 'drop-datatabase'
+			},
+		    'drop-database' => {
+			    :alias => 'drop-database',
+			    :script => "php bin/console doctrine:database:drop --force",
+			    :type => 'backend'
+		    },
+		    'reset-setup' => {
+			    :alias => 'reset-setup',
+			    :script => "php bin/console doctrine:database:drop --force"\
+			                " && composer install"\
+			                " && php bin/phing create-database"\
+			                " && php bin/console doctrine:fixtures:load --fixtures=app/DoctrineFixtures/Common --no-interaction -v"\
+							" && php bin/console doctrine:fixtures:load --append --fixtures=app/DoctrineFixtures/" + camelcase_tenant + " --no-interaction -v",
+			    :type => 'backend',
+			    :cancellable => true,
+			    :refresh_browser => true
+		    },
+		    'load-common-fixtures' => {
+			    :alias => 'load-common-fixtures',
+			    :script => "php bin/console doctrine:fixtures:load --fixtures=app/DoctrineFixtures/Common --no-interaction -v",
+			    :type => 'backend',
+			    :cancellable => true,
+			    :wait_for => 'create-database'
+		    },
+		    'load-tenant-fixtures' => {
+			    :alias => 'load-tenant-fixtures',
+			    :script => "php bin/console doctrine:fixtures:load --append --fixtures=app/DoctrineFixtures/" + camelcase_tenant + " --no-interaction -v",
+			    :type => 'backend',
+			    :cancellable => true,
+			    :wait_for => 'load-common-fixtures'
+		    },
+		    'clear-cache' => {
+			    :alias => 'clear-cache',
+				:script => "php bin/console cache:clear --env=dev",
+			    :type => 'backend'
+		    },
+		    'sencha-build' => {
+			    :alias => 'sencha-build',
+			    :script => "app build --clean",
+			    :type => 'frontend',
+			    :client => tenant,
+			    :cancellable => true,
+			    :refresh_browser => true
+		    },
+		    'sencha-resources' => {
+			    :alias => 'sencha-resources',
+			    :script => "ant resources",
+			    :type => 'frontend',
+			    :client => tenant,
+			    :cancellable => true,
+			    :refresh_browser => true
+		    },
+			'sencha-refresh' => {
+				:alias => 'sencha-refresh',
+				:script => "app refresh",
+				:type => 'frontend',
+				:client => tenant,
+				:cancellable => true,
+				:refresh_browser => true
+			},
+		    'sencha-build-js' => {
+			    :alias => 'sencha-build-js',
+			    :script => "ant js",
+			    :type => 'frontend',
+			    :client => tenant,
+			    :cancellable => true,
+			    :refresh_browser => true
+		    },
+		    'sencha-ant-sass' => {
+			    :alias => 'sencha-ant-sass',
+			    :script => "ant sass",
+			    :type => 'frontend',
+			    :client => tenant,
+			    :cancellable => true,
+			    :refresh_browser => true
+		    }
+		}
+
+		if available_tasks[command_alias]
+			# Save task to DB
+			task = available_tasks[command_alias]
+
+			execute(task)
+		else
+			@logger.error("Unknown command received: " + command_alias)
+			"Unknown command: " + command_alias
+
+			false
 		end
+	end
 
-		case command_name
-			when 'create-database'
-				command = "php bin/phing create-database"
+	#----------------------------------------------------------------
 
-				exec_vm_command(command)
+	# Stop an ongoing task
 
-			when 'drop-database'
-				exec_vm_command("php bin/console doctrine:database:drop --force")
+	def kill_task(task)
+		unless task[:pid].nil?
+			begin
+				Process.kill((RUBY_PLATFORM =~ /win32/ ? 'KILL' : 'TERM'), task[:pid])
 
-			when 'reset-setup'
-				command = "php bin/console doctrine:database:drop --force"
-				command += " && composer install"
-				command += " && php bin/phing create-database"
-				command += " && php bin/console doctrine:fixtures:load --fixtures=app/DoctrineFixtures/Common --no-interaction -v"
+				# Update task status as manually killed
+				@tasks.where(:id => task[:id]).update(:status => false, :pid => nil, :killed => true)
 
-				if client
-					client = client.split('-').select { |w| w.capitalize! || w }.join('');
-					command += " && php bin/console doctrine:fixtures:load --append --fixtures=app/DoctrineFixtures/" + client + " --no-interaction -v"
-				end
+				true
+			rescue Errno::ESRCH
+				# Update task status as manually killed
+				@tasks.where(:id => task[:id]).update(:status => false, :pid => nil, :killed => true)
 
-				exec_vm_command(command)
+				false
+			end
+		end
+	end
 
-			when 'load-common-fixtures'
-				command = "php bin/console doctrine:fixtures:load --fixtures=app/DoctrineFixtures/Common --no-interaction -v"
+	#----------------------------------------------------------------
 
-				exec_vm_command(command)
+	# Execute a task command
 
-			when 'load-tenant-fixtures'
-				if client
-					client = client.split('-').select { |w| w.capitalize! || w }.join('');
-					command = "php bin/console doctrine:fixtures:load --append --fixtures=app/DoctrineFixtures/" + client + " --no-interaction -v"
-				else
-					client = "AdraAus"
-					command = "php bin/console doctrine:fixtures:load --append --fixtures=app/DoctrineFixtures/" + client + " --no-interaction -v"
-				end
-
-				exec_vm_command(command)
-
-			when 'clear-cache'
-				exec_vm_command("php bin/console cache:clear --env=dev")
-
-			when 'sencha-build'
-				exec_sencha_command("app build --clean", client)
-
-			when 'sencha-resources'
-				exec_sencha_command("ant resources", client)
-
-			when 'sencha-refresh'
-				exec_sencha_command("app refresh", client)
-
-			when 'sencha-build-js'
-				exec_sencha_command("ant js", client)
-
-			when 'sencha-ant-sass'
-				exec_sencha_command("ant sass", client)
-
-			else
-				@logger.error("Unknown command received: " + command_name)
-				"Unknown command: " + command_name
+	def execute (task)
+		if task[:type] === 'backend'
+			exec_vm_command(task)
+		else
+			exec_sencha_command(task)
 		end
 	end
 end
