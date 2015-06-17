@@ -10,9 +10,9 @@ The Chrome extension (packaged in **extension.crx**) must be installed into Chro
 
 The Command listener daemon is a ruby script continuously running and listening on port 7500 using a lightweight HTTP server. It executes the command ordered by the Chrome extension either in the local host (commands using Sencha CMD) or in the VM (backend tasks) via SSH.
 
-### File watcher daemon
+### File watcher daemon (beta)
 
-The file watcher daemon is a ruby script continuously running and watching JS and SCSS files in the web directory. It will automatically rebuild the JS/SASS files when a change is detected, then ask the browser to reload the corresponding tabs.
+The file watcher daemon is a ruby script continuously running and watching JS and SCSS files in the web directory. It will automatically rebuild the JS/SASS files when a change is detected, then ask the browser to reload the corresponding tabs. This daemon is still in development and is not required by the Chrome extension.
 
 ## Getting started 
 
