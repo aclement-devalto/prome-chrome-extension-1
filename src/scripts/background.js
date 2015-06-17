@@ -27,9 +27,16 @@ webSocket.onmessage = function(m) {
 			// Reload Prome tabs for this tenant
 			for (var tabId in tabs) {
 				if( tabs.hasOwnProperty( tabId ) ) {
-					console.log(tabs[tabId]);
 					if (tabs[tabId].isProme === true && tabs[tabId].tenant.alias == message.tenant) {
-						chrome.tabs.reload(message.tabId);
+						// Clear cache & reload tab
+						(function(){
+							const id = tabId;
+							chrome.browsingData.removeCache({
+								"since": new Date().setDate(new Date().getDate() - 7)
+							}, function(){
+								chrome.tabs.reload(id);
+							})
+						})();
 					}
 				}
 			}
@@ -96,8 +103,12 @@ chrome.runtime.onConnect.addListener(function (port) {
 				});
 			break;
 			case 'reload-tab':
-				// Reload tab
-				chrome.tabs.reload(message.tabId, {bypassCache: true});
+				// Clear cache & reload tab
+				chrome.browsingData.removeCache({
+					"since": new Date().setDate(new Date().getDate() - 7)
+				}, function(){
+					chrome.tabs.reload(message.tabId);
+				});
 				break;
 			default:
 				//Pass message to inspectedPage
