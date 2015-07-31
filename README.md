@@ -37,13 +37,41 @@ The Dispatcher daemon is a ruby script continuously running and listening on por
 
 ## Using the devtools panel
 
-* The panel automatically recognizes which tenant you are connected to using the URL subdomain.  
+### Launch a task
+   * Click on a task to display the task tab.
+   * Click **Send command** or double-click on a task name to launch a task.
+
+_You can launch multiple tasks in parallel. When all tasks complete, the page will reload automatically. Also the extension will always clear the cache before reloading. If the database is recreated, the extension will log you out from Prome._
+
+### Tenant-aware
+The panel automatically recognizes which tenant you are connected to using the URL subdomain.  
 _Each command sent to the Dispatcher will be executed for this tenant._
 
-* Click on a task to display the task tab.
-* Click **Send command** or double-click on a task name to launch a task.
-* You can launch multiple tasks in parallel.
-* When all tasks are completed, the page will reload automatically.
+You can have multiple tabs open for different tenants. However, keep in mind that if you send a Sencha command, it will be executed for the tenant in the current tab.
+
+### Which tasks to run when you...
+_Tasks should be run simultaneously._
+
+#### ... checkout a Git branch
+   * Back-end - reset setup
+   * Front-end - build all
+
+#### ... open a tab for a different tenant
+   * Back-end - load tenant fixtures (if not already done)
+   * Front-end - build all
+
+#### ... add web resources (images, fonts)
+   * Resources - copy
+
+#### ... update SASS files
+   * SASS - compile
+
+#### ... add/remove JS file(s)
+   * Javascript - refresh index
+
+#### ... test in production (locally)
+   * Front-end - build all
+   * Back-end - clear cache
 
 ## Troubleshooting
 
