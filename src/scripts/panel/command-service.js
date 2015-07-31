@@ -74,10 +74,11 @@ angular.module('prome.services')
 					webSocket.onmessage = function(message) {
 						var response = JSON.parse(message.data);
 
-						//console.log('Response from dispatcher:');
-						//console.log(response);
-
 						var formatOutput = function (output) {
+							if (!output) {
+								return output;
+							}
+
 							lines = output.split("\n");
 
 							for (i = 0, len = lines.length; i < len; ++i) {

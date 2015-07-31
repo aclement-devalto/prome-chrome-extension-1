@@ -96,8 +96,8 @@ class Commander
 		stdout, stderr, exit_status = Open3.capture3(sencha_command)
 
 		task['status'] = exit_status.success?
-		task['output'] = Toolbox.ansi_to_html(stdout.force_encoding("ISO-8859-1").encode("UTF-8"))
-		task['error'] = Toolbox.ansi_to_html(stderr.force_encoding("ISO-8859-1").encode("UTF-8"))
+		task['output'] = stdout.force_encoding("ISO-8859-1").encode("UTF-8")
+		task['error'] = stderr.force_encoding("ISO-8859-1").encode("UTF-8")
 
 		task
 	end
