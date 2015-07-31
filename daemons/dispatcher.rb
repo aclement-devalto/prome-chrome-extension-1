@@ -28,28 +28,6 @@ class Dispatcher < Sinatra::Application
 
 		@logger = Logger.new(File.dirname(__FILE__) + '/logs/dispatcher.log')
 
-		# Setup database
-		# @db_path = File.expand_path('../../prome.db', __FILE__)
-		# @db = Sequel.connect('sqlite://' + @db_path)
-		#
-		# @db.create_table? :tasks do
-		# 	primary_key :id
-		# 	String :alias
-		# 	String :script
-		# 	String :type
-		# 	String :wait_for
-		# 	Integer :refresh_browser
-		# 	Integer :cancellable
-		# 	Integer :queued
-		# 	Integer :killed
-		# 	String :client
-		# 	Integer :pid
-		# 	Integer :status
-		# 	String :output
-		# 	String :error
-		# 	Integer :next_task
-		# end
-
 		@commander = Commander.new
 
 		# Everything OK
@@ -68,16 +46,15 @@ class Dispatcher < Sinatra::Application
 
 					@logger.info("Command received from socket (execute) " + message)
 
-
 					# Check if command parameter is defined
 					if params['command']
 						Thread.new {
 							EM.run do
 								result = @commander.process(params['command'], params['tenant'])
-								@logger.info("Command complete: " + result[:status].to_s)
+								@logger.info("Command complete: " + result['status'].to_s)
 
 								EM.next_tick {
-									@logger.info("Response sent back to socket: " + result[:status].to_s)
+									@logger.info("Response sent back to socket: " + result['status'].to_s)
 
 									ws.send(result.to_json)
 								}
@@ -85,12 +62,12 @@ class Dispatcher < Sinatra::Application
 						}
 					else
 						result = {
-							:status => false,
-							:error => 'Missing command parameter'
+							'status' => false,
+							'error' => 'Missing command parameter'
 						}
 
 						EM.next_tick {
-							@logger.info("Response sent back to socket: " + result[:error])
+							@logger.info("Response sent back to socket: " + result['error'])
 
 							ws.send(result.to_json)
 						}
