@@ -14,7 +14,7 @@ module Toolbox
 
 	# Convert ANSI styling to HTML
 
-	def ansi_to_html(data)
+	def self.ansi_to_html(data)
 		{
 			1 => :nothing,
 			2 => :nothing,
@@ -23,7 +23,7 @@ module Toolbox
 			7 => :nothing,
 			30 => :black,
 			31 => :red,
-			32 => :green,
+			32 => :limegreen,
 			33 => :yellow,
 			34 => :blue,
 			35 => :magenta,

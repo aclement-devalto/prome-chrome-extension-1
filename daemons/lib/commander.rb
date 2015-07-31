@@ -54,8 +54,8 @@ class Commander
 
 		{
 			:status => exit_code == 0,
-			:output => stdout.force_encoding("utf-8"),
-			:error => stderr.force_encoding("utf-8")
+			:output => Toolbox.ansi_to_html(stdout.force_encoding("utf-8")),
+			:error => Toolbox.ansi_to_html(stderr.force_encoding("utf-8"))
 		}
 	end
 
@@ -74,9 +74,9 @@ class Commander
 
 		response = ssh_exec! ssh, script
 
-		task['status'] = response['status']
-		task['output'] = response['output']
-		task['error'] = response['error']
+		task['status'] = response[:status]
+		task['output'] = response[:output]
+		task['error'] = response[:error]
 
 		task
 	end
@@ -96,8 +96,8 @@ class Commander
 		stdout, stderr, exit_status = Open3.capture3(sencha_command)
 
 		task['status'] = exit_status.success?
-		task['output'] = stdout.force_encoding("ISO-8859-1").encode("UTF-8")
-		task['error'] = stderr.force_encoding("ISO-8859-1").encode("UTF-8")
+		task['output'] = Toolbox.ansi_to_html(stdout.force_encoding("ISO-8859-1").encode("UTF-8"))
+		task['error'] = Toolbox.ansi_to_html(stderr.force_encoding("ISO-8859-1").encode("UTF-8"))
 
 		task
 	end
