@@ -22,16 +22,7 @@ angular.module('prome', [
 		function ($rootScope) {
 			$rootScope.inspectedPage = null;
 
-			$rootScope.tenants = [
-				{
-					alias: 'adra-aus',
-					name: 'ADRA Australia'
-				},
-				{
-					alias: 'undp-mwi',
-					name: 'UNDP Malawi'
-				}
-			];
+			$rootScope.tenants = [];
 		}
 	]);
 

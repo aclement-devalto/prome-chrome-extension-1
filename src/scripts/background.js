@@ -12,7 +12,11 @@ var tenants = [
 	},
 	{
 		alias: 'undp-mwi',
-		name: 'UNDP Malawi'
+		name: 'UNDP - Malawi'
+	},
+	{
+		alias: 'lasip-lbr',
+		name: 'LASIP - Liberia'
 	}
 ];
 
@@ -91,7 +95,8 @@ chrome.runtime.onConnect.addListener(function (port) {
 						content: mergeObjects(tabInfo, {
 							tabId: message.tabId,
 							location: location,
-							requests: {}
+							requests: {},
+							tenants: tenants
 						})
 					});
 				});
@@ -109,7 +114,7 @@ chrome.runtime.onConnect.addListener(function (port) {
 				}, function(){
 					chrome.tabs.reload(message.tabId);
 				});
-				break;
+			break;
 			default:
 				//Pass message to inspectedPage
 				chrome.tabs.sendMessage(message.tabId, message, sendResponse);
@@ -205,6 +210,16 @@ var getTabInfo = function(location) {
 		if (tenant.alias == tenantAlias) {
 			currentTenant = tenant;
 		}
+	}
+
+	// If no tenant found in the list, just use the alias as name
+	if (!currentTenant) {
+		var tenantName = tenantAlias.split('-');
+
+		currentTenant = {
+			alias: tenantAlias,
+			name: tenantName[0].toUpperCase() + ' (' + tenantName[1].toUpperCase() + ')'
+		};
 	}
 
 	return {

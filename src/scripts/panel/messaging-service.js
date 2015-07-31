@@ -21,6 +21,7 @@ angular.module('prome.services')
 
 						$rootScope.$apply(function () {
 							angular.merge($rootScope.inspectedPage, message.content);
+							$rootScope.tenants = message.content.tenants;
 						});
 						break;
 				}

@@ -102,17 +102,17 @@ angular.module('prome.controllers')
 							}
 					}
 			};
-
-			$scope.newUrl = {
+			
+			/*$scope.newUrl = {
 				tenant: $scope.tenants[0].alias,
 				env: 'dev'
-			};
+			};*/
+
 
 			$scope.inspectedPage = $rootScope.inspectedPage;
 			$scope.isCommanderAvailable = function() {
 				return Commander.getStatus();
 			};
-			//$scope.webSocket = Messaging.initWebSocket();
 
 			/**
 			 * Manually refresh current inspected page
@@ -184,7 +184,7 @@ angular.module('prome.controllers')
 			$scope.launchRequest = function(command) {
 				// Stop if similar request is already underway
 				if ($scope.inspectedPage.requests[command.alias] && $scope.inspectedPage.requests[command.alias].status == 'loading') return true;
-
+				
 				$scope.inspectedPage.requests[command.alias] = {
 					status: 'loading',
 					unread: true
