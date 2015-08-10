@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-ruby '2.1.3'
+raise 'Ruby version should be >= 2.1' unless RUBY_VERSION.to_f >= 2.1
 
 gem 'daemons',  '~>1.2.2'
 gem 'listen'
