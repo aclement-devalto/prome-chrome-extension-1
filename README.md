@@ -1,3 +1,5 @@
+**NOTE: This project is deprecated. Please look https://github.com/devalto/logalto-chrome-extension**
+
 # README
 
 ## How does it work?
